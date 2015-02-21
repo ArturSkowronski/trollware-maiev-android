@@ -4,16 +4,41 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.crashlytics.android.Crashlytics;
+import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+
+import java.net.URISyntaxException;
+
+import maiev.trollware.com.maiev.connections.MainThreadBus;
+import maiev.trollware.com.maiev.connections.ServerConnector;
+import maiev.trollware.com.maiev.connections.events.ConnectedEvent;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    MainThreadBus bus = ApplicationContext.BUS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ApplicationContext mApplication = (ApplicationContext)getApplicationContext();
+        bus.register(this);
+        ServerConnector serverConnector = new ServerConnector();
+        try {
+            serverConnector.initializeConnection();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
+    @Subscribe
+    public void answerAvailable(ConnectedEvent event) {
+        Toast.makeText(this,event.getMessage(), Toast.LENGTH_LONG).show();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
